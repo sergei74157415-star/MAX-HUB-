@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>MAX HUB | REAPER NETWORK</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@700;800;900&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ВЕРХНЕЕ МЕНЮ -->
+  <header class="top-menu" id="topMenu">
+    <div class="logo">
+      <span class="max">MAX</span><span class="hub">HUB</span>
+      <div class="logo-sub">
+        <small>REAPER NETWORK</small>
+        <small><span class="status-dot">◉</span> ONLINE</small>
+      </div>
+    </div>
+    <div id="userInfo"></div>
+  </header>
+
+  <!-- РЕГИСТРАЦИЯ -->
+  <section class="reg-section" id="regSection">
+    <h2>🔐 Регистрация</h2>
+    <div class="reg-field">
+      <label>Никнейм</label>
+      <input type="text" class="reg-input" id="nickname" placeholder="Твой ник" maxlength="20">
+    </div>
+    <div class="reg-field">
+      <label>Юзернейм (уникальный)</label>
+      <div class="username-wrap">
+        <span class="username-at">@</span>
+        <input type="text" class="reg-input username-input" id="username" placeholder="username" maxlength="20">
+      </div>
+    </div>
+    <div class="reg-field">
+      <label>Пароль</label>
+      <input type="password" class="reg-input" id="regPassword" placeholder="Минимум 4 символа">
+    </div>
+    <div class="reg-field">
+      <label>Роль</label>
+      <select class="reg-select" id="role">
+        <option>Выбери роль</option>
+        <option>Рейдер</option>
+        <option>Антирейдер</option>
+        <option>Наблюдатель</option>
+      </select>
+    </div>
+    <div class="reg-field">
+      <label>Клан</label>
+      <select class="reg-select" id="regClanSelect" onchange="regSelectClan()"></select>
+    </div>
+    <div class="reg-field" id="regClanPasswordWrap" style="display:none">
+      <label>Пароль клана</label>
+      <input type="password" class="reg-input" id="regClanPassword" placeholder="Пароль клана">
+    </div>
+    <button class="btn btn-glass-primary btn-full" onclick="registerUser()">Зарегистрироваться</button>
+
+    <div class="login-toggle">
+      <button class="btn btn-glass btn-sm" onclick="toggleLogin()">🔓 Вход по паролю</button>
+    </div>
+    <div class="login-wrap" id="loginWrap" style="display:none">
+      <div class="reg-field">
+        <label>Никнейм</label>
+        <input type="text" class="reg-input" id="loginNickname" placeholder="Твой ник">
+      </div>
+      <div class="reg-field">
+        <label>Юзернейм</label>
+        <div class="username-wrap">
+          <span class="username-at">@</span>
+          <input type="text" class="reg-input username-input" id="loginUsername" placeholder="username">
+        </div>
+      </div>
+      <div class="reg-field">
+        <label>Пароль</label>
+        <input type="password" class="reg-input" id="loginPassword" placeholder="Пароль">
+      </div>
+      <button class="btn btn-glass-primary btn-full" onclick="loginUser()">Войти</button>
+    </div>
+
+    <div class="admin-login-toggle" style="margin-top:14px">
+      <button class="btn btn-glass btn-sm" onclick="toggleAdminLogin()">🔑 Вход для администратора</button>
+    </div>
+    <div class="admin-login-wrap" id="adminLoginWrap" style="display:none">
+      <div class="reg-field">
+        <label>Ключ доступа</label>
+        <input type="password" class="reg-input" id="adminKeyInput" placeholder="Ключ администратора">
+      </div>
+      <button class="btn btn-glass-primary btn-full" onclick="adminLogin()">Войти как админ</button>
+    </div>
+  </section>
+
+  <!-- ОСНОВНОЕ ПРИЛОЖЕНИЕ -->
+  <main id="mainApp">
+
+    <!-- ЛЕНТА -->
+    <div class="tab-content active" id="tabFeed">
+      <div class="hero-mini">
+        <div class="hero-particles" id="heroParticles"></div>
+        <h1 class="main-title">MAX <span>HUB</span></h1>
+        <div class="main-title-sub">РЕЙДЕРЫ & АНТИРЕЙДЕРЫ</div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-value" id="statClans">0</div>
+            <div class="hero-stat-label">Кланов</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value" id="statNews">0</div>
+            <div class="hero-stat-label">Новостей</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value" id="statUsers">0</div>
+            <div class="hero-stat-label">Юзеров</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stories-row" id="storiesRow"></div>
+
+      <!-- Форма публикации новости клана -->
+      <div class="glass-card news-form-section" id="newsFormSection" style="display:none">
+        <div class="card-head">📢 Новость вашего клана</div>
+        <div class="reg-field">
+          <input type="text" class="reg-input" id="clanNewsTitle" placeholder="Заголовок">
+        </div>
+        <div class="reg-field">
+          <textarea class="reg-textarea" id="clanNewsText" placeholder="Текст новости..."></textarea>
+        </div>
+        <div class="attach-row">
+          <label class="attach-btn">📷 Фото
+            <input type="file" accept="image/*" hidden onchange="handleNewsImage(this,'clan')">
+          </label>
+          <div class="attach-preview" id="clanNewsPreview"></div>
+        </div>
+        <button class="btn btn-glass-primary btn-full" onclick="addClanNews()">Опубликовать</button>
+      </div>
+
+      <div id="newsContainer"></div>
+    </div>
+
+    <!-- КЛАНЫ -->
+    <div class="tab-content" id="tabClans">
+      <div class="section-block">
+        <h2><span class="icon">🏆</span> ТОП-4 РЕЙДЕРОВ</h2>
+        <div class="top-raiders-grid" id="topRaidersGrid"></div>
+      </div>
+      <div class="section-block">
+        <h2><span class="icon">🛡</span> АНТИРЕЙДЕРЫ</h2>
+        <div class="anti-grid" id="antiGrid"></div>
+      </div>
+      <div class="section-block">
+        <h2><span class="icon">⚔</span> ВСЕ РЕЙДЕРЫ</h2>
+        <div class="clan-grid" id="clanContainer"></div>
+      </div>
+      <div class="section-block">
+        <h2><span class="icon">🤝</span> СООБЩЕСТВА КЛАНОВ</h2>
+        <div id="communityContainer"></div>
+      </div>
+      <div class="section-block">
+        <h2><span class="icon">👥</span> ПОЛЬЗОВАТЕЛИ HUB</h2>
+        <div id="usersContainer"></div>
+      </div>
+    </div>
+
+    <!-- ИГРЫ -->
+    <div class="tab-content" id="tabGames">
+      <div class="section-block">
+        <h2><span class="icon">🎮</span> АВТО-ФАРМ РЕПУТАЦИИ</h2>
+        <div class="game-box">
+          <div class="game-status">
+            <div class="game-stat">
+              <div class="game-stat-label">Клан для фарма</div>
+              <select class="reg-select" id="clanSelect" onchange="selectClan()"></select>
+            </div>
+            <div class="game-stat">
+              <div class="game-stat-label">Репутация</div>
+              <div class="game-stat-value" id="currentRep">0</div>
+            </div>
+          </div>
+          <div class="game-stat" style="margin-bottom:12px">
+            <div class="game-stat-label">Выбрано</div>
+            <div class="game-stat-value" id="selectedClan">-</div>
+          </div>
+          <div id="clanPasswordWrap" style="display:none">
+            <input type="password" class="reg-input" id="clanPassword" placeholder="Пароль клана" style="margin-bottom:10px">
+          </div>
+          <div class="game-controls">
+            <button class="btn btn-glass-primary" onclick="startFarm()">▶ Старт</button>
+            <button class="btn btn-glass" onclick="stopFarm()">■ Стоп</button>
+          </div>
+          <div class="game-log" id="gameLog"><div>▶ Выбери клан</div></div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h2><span class="icon">🌿</span> МИНИ-ИГРА: ФЕРМА ТРАВЫ</h2>
+        <div class="mini-game">
+          <div class="mini-game-visual" id="plantVisual">🌱</div>
+          <div class="game-stage">Стадия: <span id="gameStage">ожидание</span></div>
+          <div class="mini-game-timer" id="miniGameLog">Нажмите "Посадить"</div>
+          <div class="game-controls">
+            <button class="btn btn-glass-success" id="plantBtn" onclick="plantWeed()">🌱 Посадить</button>
+            <button class="btn btn-glass" id="harvestBtn" onclick="harvestWeed()" disabled>🔪 Собрать</button>
+            <button class="btn btn-glass" id="deliverBtn" onclick="deliverWeed()" disabled>📦 Перевезти</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h2><span class="icon">🏅</span> ТОП ФАРМЕРОВ</h2>
+        <div id="farmerTop"></div>
+      </div>
+    </div>
+
+    <!-- АДМИН -->
+    <div class="tab-content" id="tabAdmin">
+      <div id="adminActivation" style="display:none">
+        <div class="glass-card" style="text-align:center">
+          <h2 style="justify-content:center"><span class="icon">⚡</span> Активация админ-панели</h2>
+          <div class="reg-field">
+            <input type="password" class="reg-input" id="adminKeyInputMain" placeholder="Ключ доступа">
+          </div>
+          <button class="btn btn-glass-primary btn-full" onclick="checkAdminKeyMain()">Активировать</button>
+        </div>
+      </div>
+
+      <div class="admin-panel" id="adminPanel">
+        <div class="admin-badge">⚡ АДМИН-ПАНЕЛЬ</div>
+        <div class="card-head">ADMIN ACCESS</div>
+
+        <!-- Добавить новость -->
+        <div class="admin-block">
+          <div class="admin-block-title">📰 Добавить новость</div>
+          <input type="text" class="admin-input" id="newsTitle" placeholder="Заголовок">
+          <textarea class="admin-textarea" id="newsText" placeholder="Текст..."></textarea>
+          <div class="attach-row">
+            <label class="attach-btn">📷 Фото
+              <input type="file" accept="image/*" hidden onchange="handleNewsImage(this,'admin')">
+            </label>
+            <div class="attach-preview" id="adminNewsPreview"></div>
+          </div>
+          <button class="admin-btn" onclick="addNews()">Добавить</button>
+        </div>
+
+        <!-- Создать клан -->
+        <div class="admin-block">
+          <div class="admin-block-title">🏴 Создать клан</div>
+          <div class="admin-grid-2">
+            <input type="text" class="admin-input" id="clanName" placeholder="Название">
+            <input type="text" class="admin-input" id="clanLogo" placeholder="Лого (1 символ)" maxlength="1">
+          </div>
+          <div class="admin-grid-2">
+            <input type="number" class="admin-input" id="clanRep" placeholder="Репутация">
+            <input type="password" class="admin-input" id="newClanPassword" placeholder="Пароль (опционально)">
+          </div>
+          <select class="admin-input" id="clanType">
+            <option value="raider">Рейдер</option>
+            <option value="anti">Антирейдер</option>
+          </select>
+          <div class="attach-row">
+            <label class="attach-btn">🖼 Аватарка клана (PNG)
+              <input type="file" accept="image/*" hidden onchange="handleNewClanAvatar(this)">
+            </label>
+            <div class="attach-preview" id="newClanAvatarPreview"></div>
+          </div>
+          <button class="admin-btn" onclick="addClan()">Создать клан</button>
+        </div>
+
+        <!-- Аватарка клану -->
+        <div class="admin-block">
+          <div class="admin-block-title">🖼 Аватарка существующему клану</div>
+          <select class="admin-input" id="clanAvatarSelect"></select>
+          <div class="attach-row">
+            <label class="attach-btn">📷 Загрузить PNG
+              <input type="file" accept="image/*" hidden onchange="handleClanAvatarUpload(this)">
+            </label>
+            <div class="attach-preview" id="clanAvatarPreview"></div>
+          </div>
+        </div>
+
+        <!-- Управление юзерами -->
+        <div class="admin-block">
+          <div class="admin-block-title">👥 Юзеры / Верификация / DEV</div>
+          <div class="admin-hint">✓ — галочка • 💻 — разработчик • 🗑 — удалить</div>
+          <div class="admin-grid-2" style="margin-bottom:12px">
+            <input type="text" class="admin-input" id="verifyUsername" placeholder="@username" style="margin-bottom:0">
+          </div>
+          <div style="margin-bottom:12px">
+            <button class="admin-btn" onclick="verifyUser()">✓ Верифицировать</button>
+            <button class="admin-btn" onclick="unverifyUser()">✕ Снять</button>
+            <button class="admin-btn dev-action" onclick="grantDev()">💻 Выдать DEV</button>
+            <button class="admin-btn dev-action" onclick="revokeDev()">Снять DEV</button>
+          </div>
+          <div class="admin-users-list" id="adminUsersList"></div>
+        </div>
+
+        <!-- Удалить клан -->
+        <div class="admin-block">
+          <div class="admin-block-title">🗑 Удалить клан</div>
+          <select class="admin-input" id="deleteClanSelect"></select>
+          <button class="admin-btn admin-btn-remove" onclick="deleteClan()">Удалить</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-credits">
+      <span>MAX HUB</span> © 2026 • REAPER NETWORK • Все права защищены
+    </div>
+  </main>
+
+  <!-- НИЖНЯЯ НАВИГАЦИЯ -->
+  <nav class="bottom-nav" id="bottomNav">
+    <div class="nav-indicator" id="navIndicator"></div>
+    <button class="nav-tab active" data-tab="tabFeed" onclick="switchTab('tabFeed')">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Лента</span>
+    </button>
+    <button class="nav-tab" data-tab="tabClans" onclick="switchTab('tabClans')">
+      <span class="nav-icon">⚔</span>
+      <span class="nav-label">Кланы</span>
+    </button>
+    <button class="nav-tab" data-tab="tabGames" onclick="switchTab('tabGames')">
+      <span class="nav-icon">🎮</span>
+      <span class="nav-label">Игры</span>
+    </button>
+    <button class="nav-tab" data-tab="tabAdmin" onclick="switchTab('tabAdmin')">
+      <span class="nav-icon">⚡</span>
+      <span class="nav-label">Админ</span>
+    </button>
+  </nav>
+
+  <!-- МОДАЛКА ПРОФИЛЯ -->
+  <div class="modal-overlay" id="profileModal">
+    <div class="modal-window">
+      <button class="modal-close" onclick="closeProfileModal()">✕</button>
+      <div id="profileModalBody"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
